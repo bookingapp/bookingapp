@@ -53,9 +53,9 @@
 <script type='text/javascript'>
     $(document).ready(function() {
         
-        grecaptcha.render('captcha', {
+        setTimeout(function(){grecaptcha.render('captcha', {
           'sitekey' : '6LdVQSQUAAAAAN31Tb3RtC_dBy9oJgItv6-tqTki'
-        });
+        });},2000);
         
         
     /* attach a submit handler to the form */
