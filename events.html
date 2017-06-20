@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<--
+    This file is part of Booking App.
+
+    Booking App is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Booking App is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Booking App.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="js-cookie.js"></script>
+  <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+  
+</head>
+<body>
+  <div data-role="page" id="events">
+    
+    <div data-role="header">
+    <a id="home" data-ajax="false" href="index.html">Home</a>
+    <h1>Events</h1>
+    <a id="login" href=""></a>
+    </div>
+<div id="status"></div>
+
+    
+    <div>
+    <a class="ui-btn" id="add" href="event.html">Add Event</a>
+  </div>
+  <table id="table" data-role="table" class="ui-responsive"><thead><tr><th>Event</th><th>Date</th><th>Start</th><th>End</th><th>Description</th><th>Places</th><th colspan=2>Bookings</th></tr></thead><tbody id="events"></tbody></table>
+  
+  <script>
+  
+    $(document).ready(function() {
+
+        if (Cookies.get("token") && Cookies.get("user")) {
+            $("#login").hide();
+        }
+            
+        else {
+            $("#login").text("Log in");
+            $("#login").attr("href","login.html");
+        }
+            
+    });
+
+  var book = function (event_id) {
+    window.location.href="booking.html?event_id="+event_id;
+  }
+  
+    $.get("rest.php/events?TOKEN="+Cookies.get("token")+"&USER="+Cookies.get("user"),
+    function (json) {
+      data = JSON.parse(json);
+      for (var i=0; i<data.length;i++) {
+        var event = data[i];
+        $("tbody").append("<tr><td>"+event.name+"</td><td>"+event.date+"</td><td>"+event.start+"</td><td>"+event.end+"</td><td>"+event.description+"</td><td>"+event.places+"</td><td>"+event.bookings+"</td>"+((Cookies.get("token") && Cookies.get("user")) ? "<td><input type='button' onClick='book("+event.id+")' class='"+((event.bookings>=event.places) ? "ui-state-disabled" : "" ) + "' value='Book'/>" : "") +"</td></tr>");
+        $("#table").table("refresh");
+        }
+      }
+    );
+    if (Cookies.get("user")!=1) $("#add").hide();
+  </script>
+  </div>
+</body>
+</html>
+  

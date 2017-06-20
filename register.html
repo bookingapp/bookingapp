@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<--
+    This file is part of Booking App.
+
+    Booking App is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Booking App is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Booking App.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+<title>Booking System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="js-cookie.js"></script>
+  <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit"></script>
+</head>
+<body>
+<div data-role="page" id="register">
+<div data-role="header">
+    <a id="home" href="index.html">Home</a>
+    <h1>Register</h1>
+</div>
+<form id="loginform" action="register.php" method="get">
+<div id="error"></div>
+<div>
+    <label for="username">Username</label>
+    <input id="username" name="username" type="text">
+</div>
+<div>
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email">
+</div>
+<div>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password">
+</div>
+<div id="captcha"></div>
+<div>
+    <input id="submit" type="submit" value="Register">
+</div>
+</form>
+<script type='text/javascript'>
+    $(document).ready(function() {
+        
+        grecaptcha.render('captcha', {
+          'sitekey' : '6LdVQSQUAAAAAN31Tb3RtC_dBy9oJgItv6-tqTki'
+        });
+        
+        
+    /* attach a submit handler to the form */
+    $("#loginform").submit(function(event) {
+
+      /* stop form from submitting normally */
+      event.preventDefault();
+
+      /* get the action attribute from the <form action=""> element */
+      var $form = $( this ),
+          url = $form.attr( 'action' );
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.get( url,{ 'username': $('#username').val(), 'password': $('#password').val(), 'email': $('#email').val(), 'g-recaptcha-response': grecaptcha.getResponse()} );
+
+      /* Alerts the results */
+        posting.done(function( json ) {
+        if (json) {
+            data = $.parseJSON(json);
+            if (data.status=="success")
+                window.location.href = "index.html";
+            else
+                $("#error").html("<span style='color:red'>Registration failed</span>");
+        }
+        else
+            $("#error").html("<span style='color:red'>Registration failed</span>");
+      });
+    });
+});
+</script>
+
+</body>
+</div>
+</html>

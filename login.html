@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<--
+    This file is part of Booking App.
+
+    Booking App is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Booking App is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Booking App.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="js-cookie.js"></script>
+  <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+</head>
+<body>
+    <div data-role="page" id="login">
+    <div data-role="header">
+        <h1>Log in</h1>
+        <a id="register" class="ui-btn-right" data-ajax="false" href="register.html">Register</a>
+    </div>
+    <div id="error"></div>
+    <form id="loginform" action="authenticate.php" method="get">
+        <div>
+            <label for="title">Username</label>
+            <input type="text" id="username" name="username" >
+        </div>
+        <div>
+            <label for="title">Password</label>
+            <input type="password" id="password" name="password" >
+        </div>
+        <div>
+            <input type="submit" id="submit"  name="submit" value="Submit">
+        </div>
+ </form>
+<script type='text/javascript'>
+    /* attach a submit handler to the form */
+    $("#loginform").submit(function(event) {
+
+      /* stop form from submitting normally */
+      event.preventDefault();
+
+      /* get the action attribute from the <form action=""> element */
+      var $form = $( this ),
+          url = $form.attr( 'action' );
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.get( url, { 'username': $('#username').val(), 'password': $('#password').val() } );
+
+      /* Alerts the results */
+      posting.done(function( json ) {
+        if (json) {
+        data = $.parseJSON(json);
+            Cookies.set('token',data.TOKEN);
+            Cookies.set('user',data.ID);
+            window.location.href = "index.html";
+        }
+        else
+            $("#error").html("<span style='color:red'>Login failed</span>");
+      });
+    });
+</script>
+</div>
+</body>

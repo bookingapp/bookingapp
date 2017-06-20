@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<--
+    This file is part of Booking App.
+
+    Booking App is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Booking App is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Booking App.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="js-cookie.js"></script>
+  <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+</head>
+<body>
+  <div data-role="page" id="bookings">
+    <div data-role="header">
+    <a id="home" data-ajax="false" href="index.html">Home</a>
+    <h1>Bookings</h1>
+    </div>
+  <table id="table" data-role="table" class="ui-responsive"><tbody id="bookings"><thead><tr><th class="user_title">User</th><th>Event</th><th>Date</th><th>Start</th><th>End</th><th>Places booked</th><th></th></tr></thead></tbody></table>
+    <script>
+    
+  
+    var delete_booking = function(booking_id) {
+      $.ajax({
+        url: "rest.php/bookings/"+booking_id+"?TOKEN="+Cookies.get("token")+"&USER="+Cookies.get("user"),
+        type: 'DELETE',
+        success: function () {
+          window.location.href = "bookings.html";   
+        }
+    });
+      
+    }
+    
+    var append_booking = function(user_id,booking_id,bookings) {
+      return function(json, textStatus, jqXHR) {
+        event = JSON.parse(json);
+            $("tbody").append("<tr><td class='user_title user"+user_id+"'></td><td>"+event.name+"</td><td>"+event.date+"</td><td>"+event.start+"</td><td>"+event.end+"</td><td>"+bookings+"</td><td><input type='button' value='Cancel' onClick='delete_booking("+booking_id+");'/></td></tr>");
+            if (Cookies.get("user")!=1)
+              $(".user_title").hide();
+            else
+              $.get("rest.php/users/"+user_id+"?TOKEN="+Cookies.get("token")+"&USER="+Cookies.get("user"),
+              function (json) {
+                //alert(json);
+                var user = JSON.parse(json);
+                $(".user"+user.id).text(user.name);
+                $("#table").table("refresh");
+              });
+            $("#table").table("refresh");
+      };
+    };
+    
+    $.get("rest.php/bookings?TOKEN="+Cookies.get("token")+"&USER="+Cookies.get("user"),
+    function (json) {
+      data = JSON.parse(json);
+      for (var i=0; i<data.length;i++) {
+        var booking = data[i];
+          $.get("rest.php/events/"+booking.event_id+"?TOKEN="+Cookies.get("token")+"&USER="+Cookies.get("user"),
+          append_booking(booking.user_id,booking.id,booking.bookings));
+        }  
+      }
+    );
+  </script>
+  </div>
+</body>
+</html>

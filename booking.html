@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<--
+    This file is part of Booking App.
+
+    Booking App is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Booking App is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Booking App.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="js-cookie.js"></script>
+  <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+</head>
+<body>
+
+  <div data-role="page" id="booking">
+    <div data-role="header">
+    <a id="cancel" data-ajax="false" data-icon="delete" href="index.html">Cancel</a>
+    <h1>Place booking</h1>
+    </div>
+	<table>
+		<tr>
+			<th>Event</th>
+			<td id="name"></td>
+		</tr>
+		<tr>
+			<th>Date</th>
+			<td id="date"></td>
+		</tr>
+		<tr>
+			<th>Start</th>
+			<td id="start"></td>
+		</tr>
+		<tr>
+			<th>End</th>
+			<td id="end"></td>
+		</tr>
+		<tr>
+			<th>Description</th>
+			<td id="description"></td>
+		</tr>
+		<tr>
+			<th>Places</th>
+			<td id="places"></td>
+		</tr>
+		<tr>
+			<th>Booked</th>
+			<td id="previous"></td>
+		</tr>
+		<tr>
+			<th>Remaining</th>
+			<td id="remaining"></td>
+		</tr>
+		<input type="hidden" id="previous" />
+	</table>
+	 <form id="bookingform" action="rest.php/bookings" method="post">
+        
+        <div>
+            <label for="bookings">Book how many places?</label>
+            <input type="number" id="bookings" name="bookings" value="1" min="1" step="1">
+        </div>
+        <div>
+            <input type="submit" id="submit"  name="submit" value="Book">
+        </div>
+     </form>
+<script>
+$.urlParam = function(name){
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	return decodeURIComponent(results[1]) || 0;
+}
+
+var event_id=$.urlParam('event_id');
+
+$.get("rest.php/events/"+event_id+"?TOKEN="+Cookies.get("token")+"&USER="+Cookies.get("user"),
+    function (json) {
+      var event = JSON.parse(json);
+        $("#name").text(event.name);
+        $("#date").text(event.date);
+        $("#start").text(event.start);
+        $("#end").text(event.end);
+        $("#description").text(event.description);
+        $("#places").text(event.places);
+        $("#previous").text(event.bookings),
+        $("#remaining").text(event.places - event.bookings),
+        $("#bookings").attr("max",event.places - event.bookings);
+        }
+    );
+
+   /* attach a submit handler to the form */
+    $("#bookingform").submit(function(event) {
+
+      /* stop form from submitting normally */
+      event.preventDefault();
+
+      /* get the action attribute from the <form action=""> element */
+      var $form = $( this ),
+          url = $form.attr( 'action' );
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.post( url+'?TOKEN='+Cookies.get("token")+'&USER='+Cookies.get("user"), 
+        JSON.stringify({ 
+          'user_id': Cookies.get("user"),
+          'event_id': $.urlParam('event_id'),
+          'bookings': $("#bookings").val()
+          }) );
+          
+      /* Alerts the results */
+      posting.done(function( json ) {
+        if (json) {
+        data = $.parseJSON(json);
+        window.location.href = "index.html";   
+        }
+      });
+    });
+
+</script>
+</div>
+</body>
+</html>
+
