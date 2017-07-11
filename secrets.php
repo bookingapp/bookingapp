@@ -21,7 +21,7 @@
     $default_admin_user="admin";
     $default_admin_password="admin";
     
-    $token_secret = "Kutw5Pv4";
+    $token_secret = "secret";
     
     //from google for recaptcha
     

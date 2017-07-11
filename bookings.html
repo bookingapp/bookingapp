@@ -18,6 +18,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" /> 
   <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="js-cookie.js"></script>
   <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
@@ -29,6 +30,7 @@
     <a id="home" data-ajax="false" href="index.html">Home</a>
     <h1>Bookings</h1>
     </div>
+    <div id="error"></div>
   <table id="table" data-role="table" class="ui-responsive"><tbody id="bookings"><thead><tr><th class="user_title">User</th><th>Event</th><th>Date</th><th>Start</th><th>End</th><th>Places booked</th><th></th></tr></thead></tbody></table>
     <script>
     
@@ -38,8 +40,13 @@
         url: "rest.php/bookings/"+booking_id+"?TOKEN="+Cookies.get("token")+"&USER="+Cookies.get("user"),
         type: 'DELETE',
         success: function () {
-          window.location.href = "bookings.html";   
-        }
+         window.location.href = "bookings.html";   
+        },
+          statusCode: {
+          423: function() {
+          $("#error").html("<span style='color:red'>Could not cancel booking at this time</span>");
+      }
+  }
     });
       
     }
@@ -71,7 +78,7 @@
           append_booking(booking.user_id,booking.id,booking.bookings));
         }  
       }
-    );
+    ).statusCode({ 403: function() { window.location.href = "login.html";  } });
   </script>
   </div>
 </body>

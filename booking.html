@@ -18,6 +18,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" /> 
   <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="js-cookie.js"></script>
   <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
@@ -30,6 +31,7 @@
     <a id="cancel" data-ajax="false" data-icon="delete" href="index.html">Cancel</a>
     <h1>Place booking</h1>
     </div>
+    <div id="error"></div>
 	<table>
 		<tr>
 			<th>Event</th>
@@ -122,6 +124,10 @@ $.get("rest.php/events/"+event_id+"?TOKEN="+Cookies.get("token")+"&USER="+Cookie
         data = $.parseJSON(json);
         window.location.href = "index.html";   
         }
+      });
+      
+      posting.fail( function () {
+        $("#error").html("<span style='color:red'>Could not place booking at this time</span>");
       });
     });
 

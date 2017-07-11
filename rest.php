@@ -18,6 +18,7 @@
 
 include ("db.php");
 include("tokens.php");
+
 $method = $_SERVER["REQUEST_METHOD"];
 $token = $_GET["TOKEN"];
 $user = $_GET["USER"];
@@ -32,7 +33,7 @@ $key = array_shift($request);
 //echo "table: $table\nkey: $key\ndata: $data\n";
 $tokens = tokens($user);
 if (!in_array($token,$tokens)) {
-	if ($table!="events" && $method!='GET') {
+	if (!($table=="events" && $method=='GET')) {
 		header("HTTP/1.1 403 Forbidden");
 		die();
 	}
@@ -57,7 +58,7 @@ if ($table!="bookings") {
 else {
 	$booking = json_decode($raw);
 	mysqli_autocommit($link,FALSE);
-	mysqli_query($link,"BEGIN;");
+	mysqli_begin_transaction($link);
 	$result=mysqli_query($link,"SELECT id,data FROM events where id='$booking->event_id'");
 	if ($result) {
 		$result_object=mysqli_fetch_object($result);
@@ -72,20 +73,20 @@ else {
 			}
 			else {
 				header("HTTP/1.1 423 Locked");
-				mysqli_commit($link);
-				die();
+				mysqli_rollback($link);
+				die("failed to update number of bookings in event");
 			}
 		}
 		else {
 				header("HTTP/1.1 423 Locked");
-				mysqli_commit($link);
-				die();
+				mysqli_rollback($link);
+				die("not enough places free in event");
 		}
 	}
 	else {
 				header("HTTP/1.1 423 Locked");
-				mysqli_commit($link);
-				die();
+				mysqli_rollback($link);
+				die("could not load events");
 	}
 	mysqli_commit($link);	
 	header("HTTP/1.1 200 OK");
@@ -97,7 +98,7 @@ case 'DELETE':
 if ($table=="users" && $user!="1") break;
 if ($table=="bookings") {
 		mysqli_autocommit($link,FALSE);
-		mysqli_query($link,"BEGIN;");
+		mysqli_begin_transaction($link);
 		$result=mysqli_query($link,"select id,data from bookings where id='$key'");
 		if ($result) {
 			$result_object=mysqli_fetch_object($result);
@@ -112,32 +113,37 @@ if ($table=="bookings") {
 					$data = mysqli_real_escape_string($link,json_encode($event));
 					$result=mysqli_query($link,"UPDATE events set data='$data' where id='$booking->event_id'");
 					if (!$result) {
-						header("HTTP/1.1 423 Locked");
-						mysqli_commit($link);
-						die();
+					header("HTTP/1.1 423 Locked");
+					mysqli_rollback($link);
+					die("update number of bookings in event failed");
 					}
 				}
 				else {
 					header("HTTP/1.1 423 Locked");
-					mysqli_commit($link);
-					die();
+					mysqli_rollback($link);
+					die("places already unbooked");
 				}
 			}
 			else {
-				header("HTTP/1.1 423 Locked");
-				mysqli_commit($link);
-				die();
+					header("HTTP/1.1 423 Locked");
+					mysqli_rollback($link);
+					die("failed to load event");
 			}
 		}
 		else {
-				header("HTTP/1.1 423 Locked");
-				mysqli_commit($link);
-				die();
+					header("HTTP/1.1 423 Locked");
+					mysqli_rollback($link);
+					die("failed to load bookings");
 			}
+			
+		$sql = "delete from bookings where id='$key'";
+		$result = mysqli_query($link,$sql);			
+		
 		mysqli_commit($link);
+		die("booking deleted successfully");
 	}
-	$sql = "delete from $table where id='$key'"; break;
-	break;
+	
+	
 }
 //echo "sql: $sql\n";
 $result = mysqli_query($link,$sql);
